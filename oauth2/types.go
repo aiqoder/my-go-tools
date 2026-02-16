@@ -34,19 +34,20 @@ func (t *TokenResponse) RefreshExpiresAt() time.Time {
 //
 // 从 OAuth2 服务器获取的用户基本信息
 type UserInfo struct {
-	Sub       string  `json:"sub"`        // 用户唯一标识
-	Username  string  `json:"username"`   // 用户名
-	Status    int     `json:"status"`     // 用户状态
-	ClientID  string  `json:"client_id"` // 客户端ID
-	ExpireAt  *string `json:"expireAt,omitempty"`  // 过期时间
-	IsExpired *bool   `json:"isExpired,omitempty"` // 是否已过期
+	Sub         string  `json:"sub"`                 // 用户唯一标识
+	Username    string  `json:"username"`            // 用户名
+	Status      int     `json:"status"`              // 用户状态
+	ClientID    string  `json:"client_id"`           // 客户端ID
+	ExpireAt    *string `json:"expireAt,omitempty"`  // 过期时间
+	IsExpired   *bool   `json:"isExpired,omitempty"` // 是否已过期
+	MachineCode string  `json:"machineCode"`         // 机器码
 }
 
 // OAuth2Error OAuth2 错误响应
 //
 // 统一的错误响应格式，符合 OAuth2 RFC 规范
 type OAuth2Error struct {
-	Code            string `json:"error"`             // 错误码
+	Code             string `json:"error"`             // 错误码
 	ErrorDescription string `json:"error_description"` // 错误描述
 }
 
