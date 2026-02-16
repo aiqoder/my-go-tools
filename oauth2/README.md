@@ -14,7 +14,7 @@
 ## 安装
 
 ```bash
-go get github.com/aiqoder/go-tools/oauth2
+go get github.com/aiqoder/my-go-tools/oauth2
 ```
 
 ## 快速开始
@@ -22,13 +22,13 @@ go get github.com/aiqoder/go-tools/oauth2
 ### 1. 创建配置
 
 ```go
-import "github.com/aiqoder/go-tools/oauth2"
+import "github.com/aiqoder/my-go-tools/oauth2"
 
 cfg := &oauth2.Config{
     Server:       "http://localhost:8080",      // OAuth2 服务器地址（默认 https://uf.yigechengzi.com/）
     ClientID:     "your-client-id",             // 客户端 ID
     ClientSecret: "your-client-secret",         // 客户端密钥
-    RedirectURI:  "http://localhost:3000/callback", // 回调地址，需在 OAuth2 服务提供商处配置
+    RedirectURI:  "http://localhost:3000/callback", // 回调地址，通常是前端页面，用于引导用户跳转到系统对应页面，需在 OAuth2 服务提供商处配置
 }
 // 注意：OAuth2 授权页面需要自行在前端实现，跳转到授权 URL
 ```
@@ -129,7 +129,10 @@ Authorization: Bearer {access_token}
     "sub": "user123",
     "username": "john",
     "status": 1,
-    "client_id": "app123"
+    "client_id": "app123",
+    "expireAt": "2026-12-31T23:59:59Z",
+    "isExpired": false,
+    "machineCode": "YKEY123456789"
 }
 ```
 
@@ -155,7 +158,7 @@ import (
     "log"
 
     "github.com/gin-gonic/gin"
-    "github.com/aiqoder/go-tools/oauth2"
+    "github.com/aiqoder/my-go-tools/oauth2"
 )
 
 func main() {
