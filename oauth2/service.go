@@ -11,6 +11,9 @@ import (
 	"time"
 )
 
+// 默认 OAuth2 服务器地址
+const defaultOAuth2Server = "https://uf.yigechengzi.com/"
+
 // OAuth2Service OAuth2 服务层
 //
 // 封装 OAuth2 核心业务逻辑，包括授权码换令牌、获取用户信息、刷新令牌等功能
@@ -35,9 +38,16 @@ func WithHTTPClient(client *http.Client) ServiceOption {
 // NewOAuth2Service 创建 OAuth2 服务实例
 //
 // 配置通过 Config 结构体传入，支持自定义 HTTP 客户端
+// 如果未设置 Server，将使用默认值 https://uf.yigechengzi.com/
 func NewOAuth2Service(cfg *Config, opts ...ServiceOption) *OAuth2Service {
+	// 如果未设置 Server，则使用默认值
+	server := cfg.Server
+	if server == "" {
+		server = defaultOAuth2Server
+	}
+
 	s := &OAuth2Service{
-		oauth2Server: cfg.Server,
+		oauth2Server: server,
 		clientID:     cfg.ClientID,
 		clientSecret: cfg.ClientSecret,
 		redirectURI:  cfg.RedirectURI,

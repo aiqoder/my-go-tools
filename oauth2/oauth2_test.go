@@ -626,3 +626,34 @@ func TestOAuth2Handler_RefreshToken_MissingToken(t *testing.T) {
 		t.Errorf("状态码不匹配: got %v, want %v", w.Code, http.StatusBadRequest)
 	}
 }
+
+// TestOAuth2Service_DefaultServer 测试默认 Server
+func TestOAuth2Service_DefaultServer(t *testing.T) {
+	// 不设置 Server，使用默认值
+	cfg := &Config{
+		ClientID:     "test-client",
+		ClientSecret: "test-secret",
+		RedirectURI:  "http://localhost:3000/callback",
+	}
+
+	svc := NewOAuth2Service(cfg)
+
+	// 验证使用了默认 Server
+	if svc.GetServer() != defaultOAuth2Server {
+		t.Errorf("默认 Server 不匹配: got %v, want %v", svc.GetServer(), defaultOAuth2Server)
+	}
+
+	// 验证自定义 Server 仍然有效
+	cfg2 := &Config{
+		Server:       "http://custom-server.com",
+		ClientID:     "test-client",
+		ClientSecret: "test-secret",
+		RedirectURI:  "http://localhost:3000/callback",
+	}
+
+	svc2 := NewOAuth2Service(cfg2)
+
+	if svc2.GetServer() != "http://custom-server.com" {
+		t.Errorf("自定义 Server 不匹配: got %v, want %v", svc2.GetServer(), "http://custom-server.com")
+	}
+}

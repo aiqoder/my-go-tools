@@ -25,11 +25,12 @@ go get github.com/aiqoder/go-tools/oauth2
 import "github.com/aiqoder/go-tools/oauth2"
 
 cfg := &oauth2.Config{
-    Server:       "http://localhost:8080",      // OAuth2 服务器地址
+    Server:       "http://localhost:8080",      // OAuth2 服务器地址（默认 https://uf.yigechengzi.com/）
     ClientID:     "your-client-id",             // 客户端 ID
     ClientSecret: "your-client-secret",         // 客户端密钥
-    RedirectURI:  "http://localhost:3000/callback", // 回调地址
+    RedirectURI:  "http://localhost:3000/callback", // 回调地址，需在 OAuth2 服务提供商处配置
 }
+// 注意：OAuth2 授权页面需要自行在前端实现，跳转到授权 URL
 ```
 
 ### 2. 创建服务和处理器
@@ -159,6 +160,9 @@ import (
 
 func main() {
     // 创建配置
+    // 注意：Server 默认为 https://uf.yigechengzi.com/，如需自定义请设置
+    // 注意：RedirectURI 需要自行在 OAuth2 服务提供商处配置回调地址
+    // 注意：OAuth2 授权页面需要自行在前端实现，跳转到授权 URL
     cfg := &oauth2.Config{
         Server:       "http://localhost:8080",
         ClientID:     "your-client-id",
