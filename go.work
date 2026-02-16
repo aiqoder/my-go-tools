@@ -1,0 +1,10 @@
+go 1.23.0
+
+toolchain go1.23.5
+
+use (
+	./demo/server
+	./gin-static-server
+	./oauth2
+	./uf
+)
