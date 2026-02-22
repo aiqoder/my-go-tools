@@ -13,7 +13,7 @@ import (
 // 默认配置常量
 const (
 	// DefaultBaseURL 是 UF 服务的默认基础地址
-	DefaultBaseURL = "https://uf.yigechengzi.com/"
+	DefaultBaseURL = "https://uf.yigechengzi.com"
 
 	// DefaultTimeout 是默认请求超时时间
 	DefaultTimeout = 30 * time.Second
