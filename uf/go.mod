@@ -1,3 +1,3 @@
-module github.com/aiqoder/go-tools/uf
+module github.com/aiqoder/my-go-tools/uf
 
 go 1.18

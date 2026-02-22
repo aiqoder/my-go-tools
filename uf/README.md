@@ -1,7 +1,7 @@
 # UF 用户反馈服务客户端
 
-[![Go Version](https://img.shields.io/github/go-mod/go-version/aiqoder/go-tools?label=go)](https://github.com/aiqoder/go-tools)
-[![Module](https://img.shields.io/badge/module-github.com/aiqoder/go-tools/uf-blue)](https://pkg.go.dev/github.com/aiqoder/go-tools/uf)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/aiqoder/my-go-tools?label=go)](https://github.com/aiqoder/my-go-tools)
+[![Module](https://img.shields.io/badge/module-github.com/aiqoder/my-go-tools/uf-blue)](https://pkg.go.dev/github.com/aiqoder/my-go-tools/uf)
 
 Go 语言客户端，用于对接用户反馈服务 API (`https://uf.yigechengzi.com/`)。
 
@@ -10,13 +10,12 @@ Go 语言客户端，用于对接用户反馈服务 API (`https://uf.yigechengzi
 - 简洁易用的 API 设计
 - 支持自定义 HTTP 客户端配置
 - 统一的错误处理机制
-- 模块化架构，便于扩展
 - 完整的单元测试和示例代码
 
 ## 安装
 
 ```bash
-go get github.com/aiqoder/go-tools/uf
+go get github.com/aiqoder/my-go-tools/uf
 ```
 
 ## 快速开始
@@ -26,16 +25,27 @@ package main
 
 import (
     "fmt"
-    "github.com/aiqoder/go-tools/uf"
+    "github.com/aiqoder/my-go-tools/uf"
 )
 
 func main() {
-    // 创建默认配置的客户端
     client := uf.NewClient()
 
-    // 获取 BaseURL
-    fmt.Printf("API BaseURL: %s\n", client.GetBaseURL())
-    // Output: API BaseURL: https://uf.yigechengzi.com/
+    // 记录软件活跃度
+    resp, err := client.RecordActivity(1)
+    if err != nil {
+        fmt.Printf("错误: %v\n", err)
+        return
+    }
+    fmt.Printf("活跃度记录: %v\n", resp.IsOK())
+
+    // 检查软件激活状态
+    resp2, err := client.CheckActivation(1, "ABC-123-XYZ")
+    if err != nil {
+        fmt.Printf("错误: %v\n", err)
+        return
+    }
+    fmt.Printf("已激活: %v\n", resp2.Activated)
 }
 ```
 
@@ -64,9 +74,7 @@ client := uf.NewClient(
 
 ## API 参考
 
-### 客户端创建
-
-#### NewClient
+### NewClient
 
 ```go
 func NewClient(opts ...ClientOption) *Client
@@ -74,151 +82,69 @@ func NewClient(opts ...ClientOption) *Client
 
 创建 UF 服务客户端。默认 BaseURL 为 `https://uf.yigechengzi.com/`，默认超时时间为 30 秒。
 
-### 客户端方法
-
-#### Get
+### RecordActivity
 
 ```go
-func (c *Client) Get(path string) ([]byte, error)
+func (c *Client) RecordActivity(softwareId uint) (*ActivityResponse, error)
 ```
 
-发起 GET 请求。
+记录软件活跃度。
 
-#### Post
+参数：
+- `softwareId` - 软件 ID
 
-```go
-func (c *Client) Post(path string, data interface{}) ([]byte, error)
-```
+返回：
+- `*ActivityResponse` - 活跃度记录响应
+- `error` - 错误信息
 
-发起 POST 请求（JSON 格式）。
-
-#### PostForm
-
-```go
-func (c *Client) PostForm(path string, data url.Values) ([]byte, error)
-```
-
-发起表单 POST 请求。
-
-#### Put
+### CheckActivation
 
 ```go
-func (c *Client) Put(path string, data interface{}) ([]byte, error)
-```
-
-发起 PUT 请求（JSON 格式）。
-
-#### Delete
-
-```go
-func (c *Client) Delete(path string) ([]byte, error)
-```
-
-发起 DELETE 请求。
-
-#### GetWithContext
-
-```go
-func (c *Client) GetWithContext(ctx context.Context, path string) ([]byte, error)
-```
-
-发起带上下文的 GET 请求。
-
-#### PostWithContext
-
-```go
-func (c *Client) PostWithContext(ctx context.Context, path string, data interface{}) ([]byte, error)
-```
-
-发起带上下文的 POST 请求。
-
-#### DoJSONRequest
-
-```go
-func (c *Client) DoJSONRequest(method, path string, reqBody, respBody interface{}) error
-```
-
-发起通用 JSON 请求，自动处理请求/响应序列化。
-
-#### GetBaseURL
-
-```go
-func (c *Client) GetBaseURL() string
-```
-
-返回客户端配置的 BaseURL。
-
-#### SetHTTPClient
-
-```go
-func (c *Client) SetHTTPClient(client *http.Client)
-```
-
-设置自定义 HTTP 客户端。
-
-### 活跃度记录服务
-
-#### Activity
-
-```go
-func (c *Client) Activity() *ActivityService
-```
-
-返回活跃度记录服务实例，用于创建或更新软件的活跃度记录。
-
-#### ActivityService.CreateByGET
-
-```go
-func (s *ActivityService) CreateByGET(softwareId uint) (*ActivityResponse, error)
-```
-
-通过 GET 请求创建活跃度记录。
-
-#### ActivityService.CreateByPOST
-
-```go
-func (s *ActivityService) CreateByPOST(softwareId uint) (*ActivityResponse, error)
-```
-
-通过 POST 请求创建活跃度记录。
-
-### 激活检查服务
-
-#### Activation
-
-```go
-func (c *Client) Activation() *ActivationService
-```
-
-返回激活检查服务实例，用于检查软件是否已激活及激活状态。
-
-#### ActivationService.Check
-
-```go
-func (s *ActivationService) Check(softwareId uint, machineCode string) (*ActivationCheckResponse, error)
+func (c *Client) CheckActivation(softwareId uint, machineCode string) (*ActivationCheckResponse, error)
 ```
 
 检查软件激活状态。
 
+参数：
+- `softwareId` - 软件 ID
+- `machineCode` - 机器码
+
+返回：
+- `*ActivationCheckResponse` - 激活检查响应
+- `error` - 错误信息
+
 ### 响应类型
 
-#### Response
+#### ActivityResponse
 
 ```go
-type Response struct {
+type ActivityResponse struct {
     OK    bool   `json:"ok"`
+    ID    uint   `json:"id,omitempty"`
     Error string `json:"error,omitempty"`
 }
 ```
 
-通用响应结构。
+活跃度记录响应。
+
+#### ActivationCheckResponse
+
+```go
+type ActivationCheckResponse struct {
+    OK        bool   `json:"ok"`
+    Activated bool   `json:"activated"`
+    ExpireAt string `json:"expireAt,omitempty"`
+    Error     string `json:"error,omitempty"`
+}
+```
+
+激活检查响应。
 
 ### 错误处理
 
 包提供了统一的错误类型 `Error`，包含错误码和错误信息：
 
 ```go
-// 检查错误类型
 if err != nil {
     var ufErr *uf.Error
     if errors.As(err, &ufErr) {
@@ -235,35 +161,6 @@ if err != nil {
 - `ErrCodeNetworkError` - 网络错误
 - `ErrCodeServerError` - 服务器错误
 - `ErrCodeInvalidParams` - 参数错误
-
-## 扩展性设计
-
-该包采用模块化设计，支持扩展对接 `https://uf.yigechengzi.com/` 域名下的多个 API。
-
-### 添加新 API 模块
-
-```go
-// 1. 在 client.go 中添加模块字段
-type Client struct {
-    baseURL    string
-    httpClient *http.Client
-    // 添加新模块
-    activation *ActivationAPI
-}
-
-// 2. 创建 API 模块
-type ActivationAPI struct {
-    client *Client
-}
-
-func (a *ActivationAPI) SetClient(c *Client) {
-    a.client = c
-}
-
-func (a *ActivationAPI) Path() string {
-    return "/api/activation"
-}
-```
 
 ## 示例代码
 

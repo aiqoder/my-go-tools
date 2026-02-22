@@ -1,4 +1,4 @@
-module github.com/ttw-go-tools/oauth2
+module github.com/aiqoder/my-go-tools/oauth2
 
 go 1.23.0
 

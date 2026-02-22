@@ -17,7 +17,28 @@
 ## 通用规范
 - 代码注释、Git commit 信息均使用中文
 - 代码风格遵循 Go 官方规范（gofmt）
-- 模块路径必须使用正确的组织名 `github.com/aiqoder/go-tools`，禁止使用占位符如 `your-repo`
+- 模块路径必须使用正确的组织名 `github.com/aiqoder/my-go-tools`，禁止使用占位符如 `your-repo`
+
+## API 设计原则（最重要）
+
+### 简洁性优先
+- **不暴露内部实现细节**：底层 HTTP 方法（Get、Post、DoJSONRequest 等）必须为私有方法（首字母小写）
+- **服务方法直接暴露**：将服务功能直接作为 Client 的方法暴露，而不是通过中间服务类
+- **删除不必要的公开方法**：如 GetBaseURL、SetHTTPClient、GetHTTPClient 等仅内部使用的方法不应暴露
+
+### 正确做法
+```go
+// 好：直接暴露业务方法
+func (c *Client) RecordActivity(softwareId uint) (*ActivityResponse, error)
+func (c *Client) CheckActivation(softwareId uint, machineCode string) (*ActivationCheckResponse, error)
+
+// 不好：暴露内部方法和中间服务类
+func (c *Client) Get(path string) ([]byte, error)
+func (c *Client) Activity() *ActivityService  // 不需要
+```
+
+### 模块前缀统一
+- 所有模块统一使用 `github.com/aiqoder/my-go-tools/{module}` 前缀
 
 ## 测试要求
 - 所有公共函数必须编写单元测试（使用 Go 标准测试框架）
