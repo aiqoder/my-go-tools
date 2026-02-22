@@ -355,3 +355,27 @@ func (c *Client) PostWithContext(ctx context.Context, path string, data interfac
 
 	return readResponseBody(resp)
 }
+
+// Activity 返回活跃度记录服务
+//
+// 返回活跃度记录服务实例，用于创建或更新软件的活跃度记录。
+//
+// # 示例
+//
+//	activity := client.Activity()
+//	resp, err := activity.CreateByGET(1)
+func (c *Client) Activity() *ActivityService {
+	return NewActivityService(c)
+}
+
+// Activation 返回激活检查服务
+//
+// 返回激活检查服务实例，用于检查软件是否已激活及激活状态。
+//
+// # 示例
+//
+//	activation := client.Activation()
+//	resp, err := activation.Check(1, "ABC-123-XYZ")
+func (c *Client) Activation() *ActivationService {
+	return NewActivationService(c)
+}

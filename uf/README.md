@@ -156,6 +156,50 @@ func (c *Client) SetHTTPClient(client *http.Client)
 
 设置自定义 HTTP 客户端。
 
+### 活跃度记录服务
+
+#### Activity
+
+```go
+func (c *Client) Activity() *ActivityService
+```
+
+返回活跃度记录服务实例，用于创建或更新软件的活跃度记录。
+
+#### ActivityService.CreateByGET
+
+```go
+func (s *ActivityService) CreateByGET(softwareId uint) (*ActivityResponse, error)
+```
+
+通过 GET 请求创建活跃度记录。
+
+#### ActivityService.CreateByPOST
+
+```go
+func (s *ActivityService) CreateByPOST(softwareId uint) (*ActivityResponse, error)
+```
+
+通过 POST 请求创建活跃度记录。
+
+### 激活检查服务
+
+#### Activation
+
+```go
+func (c *Client) Activation() *ActivationService
+```
+
+返回激活检查服务实例，用于检查软件是否已激活及激活状态。
+
+#### ActivationService.Check
+
+```go
+func (s *ActivationService) Check(softwareId uint, machineCode string) (*ActivationCheckResponse, error)
+```
+
+检查软件激活状态。
+
 ### 响应类型
 
 #### Response

@@ -466,3 +466,306 @@ func containsHelper(s, substr string) bool {
 	}
 	return false
 }
+
+// ============================================================================
+// 活跃度记录服务测试
+// ============================================================================
+
+// TestActivityService_CreateByGET 测试通过 GET 请求创建活跃度记录
+func TestActivityService_CreateByGET(t *testing.T) {
+	tests := []struct {
+		name       string
+		softwareID uint
+		wantID     uint
+		wantOK     bool
+	}{
+		{
+			name:       "成功响应",
+			softwareID: 1,
+			wantID:     1,
+			wantOK:     true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// 创建模拟服务器
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.Method != http.MethodGet {
+					t.Errorf("期望 GET 方法，实际 %s", r.Method)
+				}
+
+				// 验证 softwareId 参数
+				softwareId := r.URL.Query().Get("softwareId")
+				if softwareId != "1" {
+					t.Errorf("期望 softwareId=1，实际 %s", softwareId)
+				}
+
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{"ok": true, "id": 1}`))
+			}))
+			defer server.Close()
+
+			client := NewClient(WithBaseURL(server.URL))
+			activity := NewActivityService(client)
+			resp, err := activity.CreateByGET(tt.softwareID)
+
+			if err != nil {
+				t.Errorf("CreateByGET() 错误 = %v", err)
+			}
+
+			if resp.OK != tt.wantOK {
+				t.Errorf("OK = %v, want %v", resp.OK, tt.wantOK)
+			}
+
+			if resp.ID != tt.wantID {
+				t.Errorf("ID = %v, want %v", resp.ID, tt.wantID)
+			}
+		})
+	}
+}
+
+// TestActivityService_CreateByPOST 测试通过 POST 请求创建活跃度记录
+func TestActivityService_CreateByPOST(t *testing.T) {
+	tests := []struct {
+		name       string
+		softwareID uint
+		wantID     uint
+		wantOK     bool
+	}{
+		{
+			name:       "成功响应",
+			softwareID: 1,
+			wantID:     1,
+			wantOK:     true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// 创建模拟服务器
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.Method != http.MethodPost {
+					t.Errorf("期望 POST 方法，实际 %s", r.Method)
+				}
+
+				if r.Header.Get("Content-Type") != "application/json" {
+					t.Errorf("期望 Content-Type = application/json，实际 %s", r.Header.Get("Content-Type"))
+				}
+
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{"ok": true, "id": 1}`))
+			}))
+			defer server.Close()
+
+			client := NewClient(WithBaseURL(server.URL))
+			activity := NewActivityService(client)
+			resp, err := activity.CreateByPOST(tt.softwareID)
+
+			if err != nil {
+				t.Errorf("CreateByPOST() 错误 = %v", err)
+			}
+
+			if resp.OK != tt.wantOK {
+				t.Errorf("OK = %v, want %v", resp.OK, tt.wantOK)
+			}
+
+			if resp.ID != tt.wantID {
+				t.Errorf("ID = %v, want %v", resp.ID, tt.wantID)
+			}
+		})
+	}
+}
+
+// TestActivityResponse_IsOK 测试 ActivityResponse.IsOK
+func TestActivityResponse_IsOK(t *testing.T) {
+	tests := []struct {
+		name string
+		resp ActivityResponse
+		want bool
+	}{
+		{"成功响应", ActivityResponse{OK: true}, true},
+		{"失败响应", ActivityResponse{OK: false}, false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.resp.IsOK(); got != tt.want {
+				t.Errorf("IsOK() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+// TestActivityResponse_HasError 测试 ActivityResponse.HasError
+func TestActivityResponse_HasError(t *testing.T) {
+	tests := []struct {
+		name string
+		resp ActivityResponse
+		want bool
+	}{
+		{"无错误", ActivityResponse{OK: true, Error: ""}, false},
+		{"有错误", ActivityResponse{OK: false, Error: "some error"}, true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.resp.HasError(); got != tt.want {
+				t.Errorf("HasError() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+// ============================================================================
+// 激活检查服务测试
+// ============================================================================
+
+// TestActivationService_Check 测试激活检查
+func TestActivationService_Check(t *testing.T) {
+	tests := []struct {
+		name          string
+		softwareID    uint
+		machineCode   string
+		wantOK        bool
+		wantActivated bool
+		wantExpireAt  string
+	}{
+		{
+			name:          "已激活",
+			softwareID:    1,
+			machineCode:   "ABC-123-XYZ",
+			wantOK:        true,
+			wantActivated: true,
+			wantExpireAt:  "2026-12-31 23:59:59",
+		},
+		{
+			name:          "未激活",
+			softwareID:    1,
+			machineCode:   "ABC-123-XYZ",
+			wantOK:        true,
+			wantActivated: false,
+			wantExpireAt:  "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// 创建模拟服务器
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.Method != http.MethodPost {
+					t.Errorf("期望 POST 方法，实际 %s", r.Method)
+				}
+
+				if r.Header.Get("Content-Type") != "application/json" {
+					t.Errorf("期望 Content-Type = application/json，实际 %s", r.Header.Get("Content-Type"))
+				}
+
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusOK)
+				if tt.wantActivated {
+					w.Write([]byte(`{"ok": true, "activated": true, "expireAt": "2026-12-31 23:59:59"}`))
+				} else {
+					w.Write([]byte(`{"ok": true, "activated": false}`))
+				}
+			}))
+			defer server.Close()
+
+			client := NewClient(WithBaseURL(server.URL))
+			activation := NewActivationService(client)
+			resp, err := activation.Check(tt.softwareID, tt.machineCode)
+
+			if err != nil {
+				t.Errorf("Check() 错误 = %v", err)
+			}
+
+			if resp.OK != tt.wantOK {
+				t.Errorf("OK = %v, want %v", resp.OK, tt.wantOK)
+			}
+
+			if resp.Activated != tt.wantActivated {
+				t.Errorf("Activated = %v, want %v", resp.Activated, tt.wantActivated)
+			}
+
+			if resp.ExpireAt != tt.wantExpireAt {
+				t.Errorf("ExpireAt = %v, want %v", resp.ExpireAt, tt.wantExpireAt)
+			}
+		})
+	}
+}
+
+// TestActivationCheckResponse_IsOK 测试 ActivationCheckResponse.IsOK
+func TestActivationCheckResponse_IsOK(t *testing.T) {
+	tests := []struct {
+		name string
+		resp ActivationCheckResponse
+		want bool
+	}{
+		{"成功响应", ActivationCheckResponse{OK: true}, true},
+		{"失败响应", ActivationCheckResponse{OK: false}, false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.resp.IsOK(); got != tt.want {
+				t.Errorf("IsOK() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+// TestActivationCheckResponse_HasError 测试 ActivationCheckResponse.HasError
+func TestActivationCheckResponse_HasError(t *testing.T) {
+	tests := []struct {
+		name string
+		resp ActivationCheckResponse
+		want bool
+	}{
+		{"无错误", ActivationCheckResponse{OK: true, Error: ""}, false},
+		{"有错误", ActivationCheckResponse{OK: false, Error: "some error"}, true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.resp.HasError(); got != tt.want {
+				t.Errorf("HasError() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+// ============================================================================
+// 客户端便捷方法测试
+// ============================================================================
+
+// TestClient_Activity 测试客户端 Activity 便捷方法
+func TestClient_Activity(t *testing.T) {
+	client := NewClient()
+	activity := client.Activity()
+
+	if activity == nil {
+		t.Error("Activity() 不应返回 nil")
+	}
+
+	// 验证返回的是正确的服务类型
+	if _, ok := interface{}(activity).(*ActivityService); !ok {
+		t.Error("Activity() 应返回 *ActivityService")
+	}
+}
+
+// TestClient_Activation 测试客户端 Activation 便捷方法
+func TestClient_Activation(t *testing.T) {
+	client := NewClient()
+	activation := client.Activation()
+
+	if activation == nil {
+		t.Error("Activation() 不应返回 nil")
+	}
+
+	// 验证返回的是正确的服务类型
+	if _, ok := interface{}(activation).(*ActivationService); !ok {
+		t.Error("Activation() 应返回 *ActivationService")
+	}
+}
