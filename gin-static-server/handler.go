@@ -64,7 +64,7 @@ func NewWithConfig(router *gin.Engine, cfg *Config) *StaticEngine {
 // registerRoutes 注册路由
 func (e *StaticEngine) registerRoutes(router *gin.Engine) {
 	prefix := strings.TrimSuffix(e.config.Prefix, "/")
-	
+
 	// 如果启用了 SPA 回退，使用自定义处理
 	if e.config.EnableSPA && e.config.SPAFallback {
 		router.GET(prefix+"/*path", e.serveSPA())
@@ -366,7 +366,9 @@ func readFromHTTPFS(fsys http.FileSystem, path string) ([]byte, os.FileInfo, err
 }
 
 // readFromFSOpener 使用 fs.FileOpener 接口读取文件
-func readFromFSOpener(opener interface{ Open(name string) (fs2.File, error) }, path string) ([]byte, os.FileInfo, error) {
+func readFromFSOpener(opener interface {
+	Open(name string) (fs2.File, error)
+}, path string) ([]byte, os.FileInfo, error) {
 	file, err := opener.Open(path)
 	if err != nil {
 		return nil, nil, err

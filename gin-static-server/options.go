@@ -15,7 +15,7 @@ type Config struct {
 	Prefix string // URL 前缀路径
 
 	// Embed 配置
-	EmbedFS   any   // 支持 embed.FS 或 http.FileSystem
+	EmbedFS   any    // 支持 embed.FS 或 http.FileSystem
 	EmbedRoot string // embed.FS 的根目录（子目录）
 
 	// 缓存配置
@@ -37,7 +37,7 @@ type Config struct {
 	HideDotFiles bool // 是否隐藏点文件，默认 true
 
 	// 缓存控制
-	CacheControl string // 缓存控制头，默认 "public, max-age=31536000"
+	CacheControl string // 缓存控制头，默认 "public, max-age=60"
 	UseETag      bool   // 是否使用 ETag，默认 true
 
 	// 性能配置
@@ -70,7 +70,7 @@ func defaultConfig(root string) *Config {
 		IndexFile:       "index.html",
 		SPAFallback:     false,
 		HideDotFiles:    true,
-		CacheControl:    "public, max-age=31536000",
+		CacheControl:    "public, max-age=60",
 		UseETag:         true,
 		PreloadOnStart:  false,
 		ReadTimeout:     0,
@@ -364,7 +364,7 @@ func NewEmbed(router *gin.Engine, embedFS any, opts ...Option) *StaticEngine {
 		IndexFile:       "index.html",
 		SPAFallback:     false,
 		HideDotFiles:    true,
-		CacheControl:    "public, max-age=31536000",
+		CacheControl:    "public, max-age=60",
 		UseETag:         true,
 		PreloadOnStart:  false,
 		ReadTimeout:     0,
